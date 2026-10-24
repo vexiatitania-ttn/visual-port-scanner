@@ -1,0 +1,3 @@
+﻿Target,IP,Port,Penilaian Risiko,Banner
+scanme.nmap.org,45.33.32.156,22,SSH (pastikan auth kunci & versi terbaru),No banner
+scanme.nmap.org,45.33.32.156,80,HTTP plaintext,HTTP/1.1 200 OK
