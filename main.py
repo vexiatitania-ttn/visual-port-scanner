@@ -4,17 +4,14 @@ from queue import Queue, Empty
 
 import customtkinter as ctk
 
-# ====== KONFIGURASI ======
-PORT_RANGE = range(1, 101)   # port 1-100
-NUM_THREADS = 30             # jumlah worker pemindai
-TIMEOUT = 1.5                # detik
+PORT_RANGE = range(1, 101)
+NUM_THREADS = 30
+TIMEOUT = 1.5
 
-# Antrean pesan: thread scanner -> GUI (satu-satunya "jembatan" antar thread)
 ui_queue = Queue()
-DONE = object()              # penanda "scan selesai"
+DONE = object()
 
 
-# ====== BACKEND (jalan di thread terpisah, TIDAK menyentuh widget) ======
 def scan_port(target_host, target_ip, port):
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -64,12 +61,11 @@ def run_scan(target_host):
             target=worker, args=(port_queue, target_host, target_ip), daemon=True
         ).start()
 
-    port_queue.join()  # tunggu semua port selesai dipindai
+    port_queue.join()
     ui_queue.put("[*] Selesai!")
     ui_queue.put(DONE)
 
 
-# ====== GUI (hanya thread utama yang boleh menyentuh widget) ======
 def start_scan():
     target = entry_target.get().strip()
     textbox_result.delete("1.0", "end")
@@ -77,7 +73,7 @@ def start_scan():
         textbox_result.insert("end", "[-] Error: Masukkan target!\n")
         return
 
-    button_scan.configure(state="disabled")  # cegah scan ganda
+    button_scan.configure(state="disabled")
     textbox_result.insert("end", f"[*] Scanning: {target}\n")
     threading.Thread(target=run_scan, args=(target,), daemon=True).start()
 
@@ -90,10 +86,10 @@ def process_ui_queue():
                 button_scan.configure(state="normal")
             else:
                 textbox_result.insert("end", msg + "\n")
-                textbox_result.see("end")  # auto-scroll
+                textbox_result.see("end")
     except Empty:
         pass
-    app.after(100, process_ui_queue)  # jadwalkan ulang pengecekan
+    app.after(100, process_ui_queue)
 
 
 ctk.set_appearance_mode("dark")
@@ -110,5 +106,5 @@ button_scan.pack(pady=10)
 textbox_result = ctk.CTkTextbox(app, width=450, height=200)
 textbox_result.pack(pady=10)
 
-process_ui_queue()  # mulai "pemantau" antrean
+process_ui_queue()
 app.mainloop()
